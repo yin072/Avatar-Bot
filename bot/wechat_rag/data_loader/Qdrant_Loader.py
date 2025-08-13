@@ -84,7 +84,7 @@ class QdrantLoader:
         """批量处理文件（带错误处理）"""
         txt_files = self.load_txt_files(input_folder)
         if not txt_files:
-            print(f"警告：在 {input_folder} 中未找到任何txt文件")
+            print(f"警告：在 {input_folder} 中未找到任何聊天记录文件")
             return
 
         for file_path in txt_files:
