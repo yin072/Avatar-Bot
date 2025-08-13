@@ -1,102 +1,111 @@
 import os
-import numpy as np
-from qdrant_client import QdrantClient
-from qdrant_client.models import VectorParams, Distance, PointStruct
-from transformers import AutoTokenizer, AutoModel
-import torch
-import uuid
-from Config import Config
 from langchain.text_splitter import CharacterTextSplitter
+from langchain_qdrant import Qdrant  # 使用新版Qdrant集成
+from langchain_huggingface import HuggingFaceEmbeddings
+from qdrant_client import QdrantClient
+from qdrant_client.models import VectorParams, Distance
+from Config import Config
+import warnings
+
 
 class QdrantLoader:
     def __init__(self):
-        # 初始化Qdrant客户端
-        self.client = QdrantClient(host=Config.QDRANT_HOST, port=Config.QDRANT_PORT)
-        self.collection_name = Config.QDRANT_COLLECTION
+        # 初始化嵌入模型（确保与Config中的模型名称一致）
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name=Config.EMBEDDING_MODEL,
+            model_kwargs={'device': 'cpu'},  # 如果没有GPU则使用cpu
+            encode_kwargs={'normalize_embeddings': False}
+        )
         
-        # 加载嵌入模型
-        self.tokenizer = AutoTokenizer.from_pretrained(Config.EMBEDDING_MODEL)
-        self.model = AutoModel.from_pretrained(Config.EMBEDDING_MODEL)
+        # 初始化Qdrant客户端
+        self.collection_name = Config.QDRANT_COLLECTION
+        self.qdrant_client = QdrantClient(
+            path=Config.QDRANT_PATH,
+            prefer_grpc=False  # Windows下建议关闭grpc
+        )
+        
+        # 确保集合存在
+        self._ensure_collection_exists()
+        
+        # 初始化LangChain Qdrant包装器
+        self.client = Qdrant(
+            client=self.qdrant_client,
+            collection_name=self.collection_name,
+            embeddings=self.embeddings
+        )
 
-        # 创建 Qdrant collection（如果不存在）
-        self.create_collection()
-
-    def create_collection(self):
+    def _ensure_collection_exists(self):
+        """确保Qdrant集合存在且配置正确"""
         try:
-            self.client.get_collection(self.collection_name)
-        except Exception as e:
-            print(f"Collection '{self.collection_name}' does not exist, creating a new one...")
-            self.client.recreate_collection(
+            collection_info = self.qdrant_client.get_collection(self.collection_name)
+            # 验证向量维度是否匹配（M3E模型通常是768维）
+            if collection_info.config.params.vectors.size != 768:
+                raise ValueError("Existing collection has wrong vector size")
+        except Exception:
+            # 集合不存在或配置错误，重新创建
+            self.qdrant_client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=VectorParams(size=768, distance=Distance.COSINE)  # 根据嵌入模型的维度设置大小
+                vectors_config=VectorParams(
+                    size=768,  # M3E-base模型输出768维
+                    distance=Distance.COSINE
+                )
             )
 
     def load_txt_files(self, input_folder):
-        """遍历文件夹，获取所有txt文件"""
-        txt_files = []
-        for dirpath, dirnames, filenames in os.walk(input_folder):
-            for filename in filenames:
-                if filename.endswith('.txt'):
-                    txt_files.append(os.path.join(dirpath, filename))
-        return txt_files
+        """遍历文件夹，获取所有txt文件（优化版）"""
+        return [
+            os.path.join(root, file)
+            for root, _, files in os.walk(input_folder)
+            for file in files
+            if file.endswith('.txt')
+        ]
 
     def chunk_text(self, text, chunk_size=300, chunk_overlap=50):
         """
-        使用 langchain 的 CharacterTextSplitter 进行文本分块
-        支持按字符分割，并可设置重叠部分
-        
-        参数:
-            text (str): 要分割的文本
-            chunk_size (int): 每个块的最大长度（字符数）
-            chunk_overlap (int): 块之间的重叠长度（字符数）
-            
-        返回:
-            List[str]: 分割后的文本块列表
+        优化后的文本分块方法
         """
-        # 初始化分割器
+        
+        """
+        改进分块策略：首先，按行分割每一句对话，按照首先设定的分块大小填充对话，
+        当满了之后检查有多少条对话，如果过少就说明有长对话。此时扩大块大小，
+        如此循环，得出一个分块列表，在这个过程中确保单条对话不被分割，
+        按照预先设定的上下文大小保留上下文（使用队列先保存上下文，在下一个块开始时把队列里的内容添加进去）
+        """
+        
         text_splitter = CharacterTextSplitter.from_tiktoken_encoder(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
+            separator="\n",  # 按行分割更合理
+            strip_whitespace=True
         )
-        
-        # 执行分割（返回 Document 对象列表）
-        documents = text_splitter.create_documents([text])
-        
-        # 提取纯文本内容
-        chunks = [doc.page_content for doc in documents]
-        return chunks
-
-    def text_to_vector(self, text):
-        """将文本转换为向量"""
-        inputs = self.tokenizer(text, return_tensors='pt', truncation=True, padding=True, max_length=512)
-        with torch.no_grad():
-            embeddings = self.model(**inputs).last_hidden_state.mean(dim=1)
-        return embeddings.squeeze().numpy()
-
-    def save_to_qdrant(self, text_chunks, file_id):
-        """将文本切割后的内容和向量存储到 Qdrant 中"""
-        points = []
-        for idx, chunk in enumerate(text_chunks):
-            vector = self.text_to_vector(chunk)
-            # 使用UUID作为点ID
-            point_id = str(uuid.uuid4())
-            points.append(PointStruct(
-                id=point_id,
-                vector=vector.tolist(),
-                payload={
-                    "text": chunk,
-                    "source_file": file_id,
-                    "chunk_index": idx
-                }
-            ))
-        self.client.upsert(collection_name=self.collection_name, points=points)
+        return text_splitter.split_text(text)
 
     def process_files(self, input_folder):
-        """处理文件夹中的所有txt文件"""
+        """批量处理文件（带错误处理）"""
         txt_files = self.load_txt_files(input_folder)
+        if not txt_files:
+            print(f"警告：在 {input_folder} 中未找到任何txt文件")
+            return
+
         for file_path in txt_files:
-            print(f"Processing file: {file_path}")
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()
-            chunks = self.chunk_text(content)
-            self.save_to_qdrant(chunks, os.path.basename(file_path))
+            try:
+                print(f"正在处理: {file_path}")
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                
+                chunks = self.chunk_text(content)
+                if not chunks:
+                    continue
+                
+                # 批量插入（优化性能）
+                self.client.add_texts(
+                    texts=chunks,
+                    metadatas=[{
+                        "source_file": os.path.basename(file_path),
+                        "file_path": file_path
+                    } for _ in chunks],
+                    batch_size=100  # 分批插入防止内存不足
+                )
+            except Exception as e:
+                print(f"处理文件 {file_path} 时出错: {str(e)}")
+                continue
