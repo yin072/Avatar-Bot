@@ -5,7 +5,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance
 from Config import Config
-import warnings
 
 
 class QdrantLoader:

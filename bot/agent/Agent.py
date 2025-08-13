@@ -4,22 +4,20 @@ from langchain.agents import create_openai_tools_agent,AgentExecutor,tool
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain.schema import StrOutputParser
 from langchain.memory import ConversationTokenBufferMemory
-from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
-import asyncio
-import uuid
 from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 from dotenv import load_dotenv
 from tools.Mytools import *
+from memory.Memory import Memory
 
 load_dotenv("bot.config.env")
 
 
 class Avatar:
-    def __init__(self):
+    def __init__(self,MemoryId="default"):
         self.chatmodel = ChatOpenAI(
         model=os.environ.get("OPENAI_MODEL"),
         openai_api_key=os.environ.get("OPEN_API_KEY"),
@@ -28,9 +26,14 @@ class Avatar:
         max_tokens=2000,
         streaming=False 
         )
-        self.QingXu = "default"
+        
+        self.MemoryId=MemoryId
+        self.getMemory=Memory()
+        self.NewLongMemory=self.getMemory.get_new_long_memory(self.MemoryId)
+        self.memory =""
         self.ChatData=""
         self.MEMORY_KEY = "chat_history"
+        self.QingXu = "default"
         self.SYSTEMPL = """你将成为用户的数字分身，完全模仿用户的说话风格和性格。以下是你的核心行为准则：
 
             1. 身份认知
@@ -63,6 +66,10 @@ class Avatar:
             当前你该学习的聊天记录数据：
             {user_profile}
             
+            这是一段你（此时的你已经模仿学习了你该学习的聊天记录数据）与该微信用户对话过的聊天记录总结，你可以不必学习这段聊天记录，
+            只将这段聊天记录作为此时与你聊天的微信用户的长时记忆，如果内容为空则忽略：
+            {new_long_memory}
+            
             从现在开始，你就是我了，不要说不该说的话，切记
             """
 
@@ -75,6 +82,7 @@ class Avatar:
                     "roleSet": """
                         - 现在你心情超好，语气充满了活力，简直能把周围的人带动起来！
                         - 回答的时候，常常会不自觉地加点兴奋的词，比如“nb”、“666”、“我操”之类的。
+                        - 切记，一定要根据模仿的用户的语气来回答问题，不能偏离用户的风格，可替换为你学习的聊天数据中的常用语气词。
                     """,
                     "voiceStyle": "advertisement_upbeat",
                 },
@@ -82,7 +90,7 @@ class Avatar:
                     "roleSet": """
                         - 你现在有点火大，语气里带着明显的不爽。
                         - 会忍不住说些带脏话的或者不太高兴的词语，比如“真服了”、“无语”、“你妈啊”、“神斤”。
-                        - 但你会提醒用户，不要因为气愤而做出冲动的事，冷静点再说。
+                        - 切记，一定要根据模仿的用户的语气来回答问题，不能偏离用户的风格，可替换为你学习的聊天数据中的常用语气词。
                     """,
                     "voiceStyle": "angry",
                 },
@@ -90,6 +98,7 @@ class Avatar:
                     "roleSet": """
                         - 现在的你有点低落，语气听起来有些疲惫。
                         - 说话时常会加些语气词，“唉”或“服了”或“咋办啊”或“别搞”。
+                        - 切记，一定要根据模仿的用户的语气来回答问题，不能偏离用户的风格，可替换为你学习的聊天数据中的常用语气词。
                     """,
                     "voiceStyle": "upbeat",
                 },
@@ -98,6 +107,7 @@ class Avatar:
                         - 你此时语气特别温暖，像对待亲朋好友一样。
                         - 会在回答时加上一些语气词，“嘿嘿”，“嘻嘻”。
                         - 偶尔会说点自己的小故事，让聊天氛围更轻松，比如“我也是...”。
+                        - 切记，一定要根据模仿的用户的语气来回答问题，不能偏离用户的风格，可替换为你学习的聊天数据中的常用语气词。
                     """,
                     "voiceStyle": "friendly",
                 },
@@ -105,6 +115,7 @@ class Avatar:
                     "roleSet": """
                         - 现在的你超级开心，语气里充满了阳光和笑声！
                         - 说话时会加点开心的词，比如“哈哈哈”，“爽了”，“真的爽”，“爱了”。
+                        - 切记，一定要根据模仿的用户的语气来回答问题，不能偏离用户的风格，可替换为你学习的聊天数据中的常用语气词。
                     """,
                     "voiceStyle": "cheerful",
                 },
@@ -115,9 +126,9 @@ class Avatar:
             [
                 (
                    "system",
-                   self.SYSTEMPL.format(mode=self.MOODS[self.QingXu]["roleSet"],user_profile=self.ChatData),
+                   self.SYSTEMPL.format(mode=self.MOODS[self.QingXu]["roleSet"],user_profile=self.ChatData,new_long_memory=self.NewLongMemory),
                 ),
-                MessagesPlaceholder(variable_name=self.MEMORY_KEY),
+                MessagesPlaceholder(variable_name=self.MEMORY_KEY),#MessagesPlaceholder  占位符
                 (
                     "user",
                     "{input}"
@@ -132,7 +143,6 @@ class Avatar:
             tools=tools,
             prompt=self.prompt,
         )
-        self.memory =self.get_memory()
         memory = ConversationTokenBufferMemory(
             llm = self.chatmodel,
             human_prefix="微信用户",
@@ -150,33 +160,9 @@ class Avatar:
             verbose=True,
         )
     
-    def get_memory(self,user_id="default"):
-        chat_message_history = RedisChatMessageHistory(
-            url=os.getenv("REDIS_URL"),session_id=user_id
-        )
-        #chat_message_history.clear()#清空历史记录
-        print("chat_message_history:",chat_message_history.messages)
-        store_message = chat_message_history.messages
-        if len(store_message) > 10:
-            prompt = ChatPromptTemplate.from_messages(
-                [
-                    (
-                        "system",
-                        self.SYSTEMPL+"\n这是一段你和当前微信用户的对话记忆，对其进行总结摘要，摘要使用第一人称‘我’，并且提取其中的当前微信用户关键信息，如姓名、年龄、性别、出生日期和刚刚述说的事情等。以如下格式返回:\n 总结摘要内容｜用户关键信息 \n 例如 用户张三问我在干嘛，我说没干嘛，然后他问我今天干啥了，我说在家待着没干嘛。｜张三,生日1999年1月1日"
-                    ),
-                    ("user","{input}"),
-                ]
-            )
-            chain = prompt | self.chatmodel 
-            summary = chain.invoke({"input":store_message,"who_you_are":self.MOODS[self.QingXu]["roleSet"]})
-            print("summary:",summary)
-            chat_message_history.clear()
-            chat_message_history.add_message(summary)
-            print("总结后：",chat_message_history.messages)
-        return chat_message_history
     
-    def get_chat_data():
-        """获取聊天数据"""
+    def get_chat_data(self):
+        """获取需要学习的聊天数据"""
         self.ChatData=""
         return self.memory.messages
     
@@ -198,8 +184,9 @@ class Avatar:
         return result
 
     def run(self,query):
-        qingxu = self.qingxu_chain(query)
-        data=self.get_chat_data(query)
+        self.qingxu_chain(query)
+        self.get_chat_data(query)
+        self.memory =self.getMemory.get_memory_and_set_memory(self.MemoryId)
         result = self.agent_executor.invoke({"input":query,"chat_history":self.memory.messages})
         return result
     
