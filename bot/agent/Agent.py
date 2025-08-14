@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from tools.Mytools import *
 from memory.Memory import Memory
 
-load_dotenv("bot.config.env")
+load_dotenv("bot/config.env")
 
 
 class Avatar:
@@ -29,8 +29,8 @@ class Avatar:
         
         self.MemoryId=MemoryId
         self.getMemory=Memory()
-        self.NewLongMemory=self.getMemory.get_new_long_memory(self.MemoryId)
         self.memory =""
+        self.memory =self.getMemory.get_memory_and_set_memory(self.MemoryId)
         self.ChatData=""
         self.MEMORY_KEY = "chat_history"
         self.QingXu = "default"
@@ -65,10 +65,6 @@ class Avatar:
 
             当前你该学习的聊天记录数据：
             {user_profile}
-            
-            这是一段你（此时的你已经模仿学习了你该学习的聊天记录数据）与该微信用户对话过的聊天记录总结，你可以不必学习这段聊天记录，
-            只将这段聊天记录作为此时与你聊天的微信用户的长时记忆，如果内容为空则忽略：
-            {new_long_memory}
             
             从现在开始，你就是我了，不要说不该说的话，切记
             """
@@ -143,6 +139,7 @@ class Avatar:
             tools=tools,
             prompt=self.prompt,
         )
+        # 短时记忆实现
         memory = ConversationTokenBufferMemory(
             llm = self.chatmodel,
             human_prefix="微信用户",
@@ -152,6 +149,7 @@ class Avatar:
             return_messages=True,
             max_token_limit=1000,
             chat_memory=self.memory,
+            #实际上，chat_memory 接受一个 RedisChatMessageHistory 实例，负责存储对话历史
         )
         self.agent_executor = AgentExecutor(
             agent = agent,
@@ -186,7 +184,6 @@ class Avatar:
     def run(self,query):
         self.qingxu_chain(query)
         self.get_chat_data(query)
-        self.memory =self.getMemory.get_memory_and_set_memory(self.MemoryId)
         result = self.agent_executor.invoke({"input":query,"chat_history":self.memory.messages})
         return result
     

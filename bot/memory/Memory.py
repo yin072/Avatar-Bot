@@ -3,14 +3,8 @@ import os
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_qdrant import Qdrant  # 使用新版Qdrant集成
-from langchain_huggingface import HuggingFaceEmbeddings
-from qdrant_client import QdrantClient
 
-from typing import List
-from langchain_core.documents import Document
-
-load_dotenv("bot.config.env")
+load_dotenv("bot/config.env")
 
 class Memory:
     def __init__(self):
@@ -22,9 +16,20 @@ class Memory:
         max_tokens=2000,
         streaming=False 
         )
-        
+     
+     #长时记忆实现   
     def get_memory_and_set_memory(self,MemoryId):
-        "获取与用户对话的短时记忆，并总结至长时记忆库"""
+        "获取与用户对话的记忆"""
+        
+        """工作流程如下：
+        1. **初始化时**，`self.memory` 为空，从 `get_memory()` 获取历史记录（若无则为空）。
+        2. **`ConversationTokenBufferMemory`** 使用 `self.memory` 来存储对话历史。
+        3. 每次对话后，`self.memory` 会更新，存储新的用户和 AI 消息。
+        4. **超过 10 条消息时**，`get_memory()` 会生成摘要并清空历史记录，将摘要存回 Redis。
+        5. **循环**：每次有新消息，`self.memory` 会更新，`get_memory()` 会重新生成并存储摘要，确保记忆管理。
+
+        最终，`ConversationTokenBufferMemory` 管理内存，`RedisChatMessageHistory` 负责持久化存储。
+        """
         chat_message_history = RedisChatMessageHistory(
             url=os.getenv("REDIS_URL"),session_id=MemoryId
         )
@@ -35,7 +40,7 @@ class Memory:
                 [
                     (
                         "system",
-                        "这是一段你模仿聊天数据和当前微信用户的对话记忆，对其进行总结摘要，摘要使用第一人称‘我’，并且提取其中的当前微信用户关键信息，如姓名、年龄、性别、出生日期和刚刚述说的事情等。以如下格式返回:\n 总结摘要内容｜用户关键信息 \n 例如 用户张三问我在干嘛，我说没干嘛，然后他问我今天干啥了，我说在家待着没干嘛。｜张三,生日1999年1月1日"
+                        "这是一段你模仿了一个人的聊天数据和然后跟另一个微信用户的当前对话记忆，对其进行总结摘要，摘要使用第一人称‘我’，并且提取其中的当前微信用户关键信息，如姓名、年龄、性别、出生日期和刚刚述说的事情等。以如下格式返回:\n 总结摘要内容｜用户关键信息 \n 例如 用户张三问我在干嘛，我说没干嘛，然后他问我今天干啥了，我说在家待着没干嘛。｜张三,生日1999年1月1日"
                     ),
                     ("user","{input}"),
                 ]
@@ -43,59 +48,8 @@ class Memory:
             chain = prompt | self.chatmodel 
             summary = chain.invoke({"input":store_message})
             print("summary:",summary)
-            # 调用qdrant存储方法
-            self.qdrant_load(
-                summary_content=str(summary),
-                memory_id=MemoryId,
-                metadata={
-                    "source": "wechat",
-                    "summary_type": "conversation"
-                }
-            )
             chat_message_history.clear()
             chat_message_history.add_message(summary)
             print("总结后：",chat_message_history.messages)
         return chat_message_history
     
-    def get_new_long_memory(self,MemoryId):
-        "获取新的与用户对话的长期记忆"""
-        
-        
-    def qdrant_load(self, summary_content: str, memory_id: str, metadata: dict = None):
-        """将总结的记忆存入本地Qdrant向量数据库
-        
-        Args:
-            summary_content: 要存储的总结文本内容
-            memory_id: 记忆的唯一标识符
-            metadata: 额外的元数据 (默认为None)
-        """
-        # 初始化本地Qdrant客户端
-        qdrant_client = QdrantClient(path="bot/local_qdrand")  # 指定本地存储路径
-        
-        # 初始化嵌入模型 (使用你已导入的HuggingFaceEmbeddings)
-        embeddings = HuggingFaceEmbeddings(
-            model_name="moka-ai/m3e-base",  # 推荐的中文嵌入模型
-            model_kwargs={'device': 'cpu'}
-        )
-        
-        # 创建LangChain的Qdrant实例
-        qdrant = Qdrant(
-            client=qdrant_client,
-            collection_name="memory_summaries",  # 指定集合名称
-            embeddings=embeddings
-        )
-        
-        # 准备文档对象
-        doc = Document(
-            page_content=summary_content,
-            metadata={
-                "memory_id": memory_id,
-                "type": "memory_summary",
-                "timestamp": datetime.datetime.now().isoformat(),
-                **(metadata or {})  # 合并额外元数据
-            }
-        )
-        
-        # 存入向量数据库
-        qdrant.add_documents([doc])
-        print(f"已成功将记忆 {memory_id} 存入Qdrant数据库")
