@@ -7,7 +7,7 @@ load_dotenv("bot/config.env")
 class Config:
     # Qdrant 配置
     QDRANT_PATH = os.getenv("QDRANT_PATH")
-    QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "wechat_chat_history")
+    QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION")
     
     # 嵌入模型配置
     EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL")

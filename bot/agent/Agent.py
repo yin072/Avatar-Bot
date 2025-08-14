@@ -6,8 +6,8 @@ from langchain.schema import StrOutputParser
 from langchain.memory import ConversationTokenBufferMemory
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
-from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 from dotenv import load_dotenv
 from tools.Mytools import *
@@ -158,11 +158,40 @@ class Avatar:
             verbose=True,
         )
     
-    
-    def get_chat_data(self):
+        
+    def get_chat_data(self, query: str, score_threshold: float = 0.2):
         """获取需要学习的聊天数据"""
-        self.ChatData=""
-        return self.memory.messages
+        
+        """
+        获取相关性超过阈值的所有记录
+        
+        Args:
+            query: 查询文本
+            score_threshold: 相关性阈值 (0-1)
+        """
+        # 1. 生成查询向量
+        embeddings = HuggingFaceEmbeddings(model_name=os.environ.get("EMBEDDING_MODEL"))
+        query_vector = embeddings.embed_query(query)
+        
+        # 2. 初始化客户端
+        client = QdrantClient(path=os.environ.get("QDRANT_PATH"))
+        
+        # 3. 执行带阈值的搜索
+        results = client.search(
+            collection_name=os.environ.get("QDRANT_COLLECTION"),
+            query_vector=query_vector,
+            limit=10000,  # 足够大的上限
+            score_threshold=score_threshold,  # 关键参数
+            with_payload=True
+        )
+        
+        # 4. 格式化结果
+        self.ChatData = "\n\n".join([
+            f"【相关聊天记录 {i+1} | 相似度:{hit.score:.2f}】\n"
+            f"{hit.payload.get('text', '')}\n"
+            f"元数据: {hit.payload.get('metadata', {})}"
+            for i, hit in enumerate(results)
+        ])
     
     def qingxu_chain(self,query:str):
         prompt = """根据用户的输入判断用户的情绪，回应的规则如下：
