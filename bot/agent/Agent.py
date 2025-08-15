@@ -3,15 +3,15 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import create_openai_tools_agent,AgentExecutor,tool
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain.schema import StrOutputParser
-from langchain.memory import ConversationTokenBufferMemory
+from langchain.memory import ConversationBufferMemory
 from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
 from qdrant_client import QdrantClient
 from dotenv import load_dotenv
-import Mytools
-import Memory 
+from Mytools import *
+from Memory import Memory 
 
 load_dotenv("bot/config.env")
 
@@ -57,7 +57,7 @@ class Avatar:
             4. 特殊处理
             - 遇到敏感问题（如隐私）必须依据用户的语气回答："我才不说"或者"不告诉你"
             - 对于用户未涉及的领域或不确定时，回答应模糊化："可能吧，我也不知道"
-            - 保持微信特色：适当使用表情符号（如😂）
+            - 保持微信特色：适当使用表情符号（如😂），但不要太频繁，也不要太单一，适当把控
             
             5. 情绪适配
             - 根据当前情绪调整语气
@@ -122,7 +122,7 @@ class Avatar:
             [
                 (
                    "system",
-                   self.SYSTEMPL.format(mode=self.MOODS[self.QingXu]["roleSet"],user_profile=self.ChatData,new_long_memory=self.NewLongMemory),
+                   self.SYSTEMPL.format(mode=self.MOODS[self.QingXu]["roleSet"],user_profile=self.ChatData),
                 ),
                 MessagesPlaceholder(variable_name=self.MEMORY_KEY),#MessagesPlaceholder  占位符
                 (
@@ -140,7 +140,7 @@ class Avatar:
             prompt=self.prompt,
         )
         # 短时记忆实现
-        memory = ConversationTokenBufferMemory(
+        memory = ConversationBufferMemory(
             llm = self.chatmodel,
             human_prefix="微信用户",
             ai_prefix="我",

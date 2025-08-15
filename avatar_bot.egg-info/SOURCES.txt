@@ -1,0 +1,5 @@
+setup.py
+avatar_bot.egg-info/PKG-INFO
+avatar_bot.egg-info/SOURCES.txt
+avatar_bot.egg-info/dependency_links.txt
+avatar_bot.egg-info/top_level.txt
