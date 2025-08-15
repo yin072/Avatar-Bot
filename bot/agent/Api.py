@@ -1,4 +1,5 @@
 from fastapi import FastAPI 
+import Agent # 导入 Avatar 类
 
 app = FastAPI()  # 创建 FastAPI 实例
 

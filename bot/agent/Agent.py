@@ -10,8 +10,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
 from qdrant_client import QdrantClient
 from dotenv import load_dotenv
-from tools.Mytools import *
-from memory.Memory import Memory
+import Mytools
+import Memory 
 
 load_dotenv("bot/config.env")
 
@@ -133,7 +133,7 @@ class Avatar:
             ],
         )
         
-        tools = [search,get_info_from_local_db,bazi_cesuan,yaoyigua,jiemeng]
+        tools = [search]
         agent = create_openai_tools_agent(
             self.chatmodel,
             tools=tools,

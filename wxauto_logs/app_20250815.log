@@ -1,0 +1,193 @@
+2025-08-15 00:36:15 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:36:15 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 文件传输助手, False, False, 0.5
+2025-08-15 00:36:25 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:36:25 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 文件传输助手, False, False, 0.5
+2025-08-15 00:37:00 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:37:00 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 00:37:06 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:37:06 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 00:37:30 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:37:30 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 00:38:52 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:38:52 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 00:44:40 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:44:40 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 00:47:05 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:47:05 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 00:48:05 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 00:48:05 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 01:03:32 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 01:12:01 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 01:27:09 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 01:27:47 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 01:28:15 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 01:28:49 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 01:30:22 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:16:38 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: 我还可以玩两把, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: 我睡了, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: 晚安老婆, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: sb, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: sb, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: sb, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: sb, length: 8
+2025-08-15 02:16:39 [wxauto] [DEBUG] [msg.py:79]  content: sb, length: 8
+2025-08-15 02:18:09 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: /微信4.0, length: 10
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: [疑问]有新版本吗, length: 10
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: wxauto开源版暂不支持4.0微信，目前plus版本已经发布beta测试包可支持4.0.5版本
+你可以使用最新的3.9.12.55版本微信，微信官网就可以下载，并且3.9和4.0可以共存，装在不同路径即可, length: 10
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: 好的, length: 10
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: plus多少忙给, length: 10
+2025-08-15 02:18:10 [wxauto] [DEBUG] [msg.py:79]  content: @mr 加我
+引用  的消息 : plus多少忙给, length: 18
+2025-08-15 02:18:20 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:18:21 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:18:21 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:18:21 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:18:21 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:21:06 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:21:07 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:21:07 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:21:07 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:21:07 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:22:02 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:22:03 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:22:03 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:22:03 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:22:03 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:00 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:25:01 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:25:01 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:25:01 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:01 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:11 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:25:12 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:25:12 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:25:12 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:12 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:32 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:25:33 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:25:33 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:25:33 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:33 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:40 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:25:41 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:25:41 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:25:41 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:25:41 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:27:36 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:27:37 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:27:37 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:27:37 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:27:37 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:28:10 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 02:28:11 [wxauto] [DEBUG] [msg.py:79]  content: .\wechat-dump-rs.exe -a, length: 8
+2025-08-15 02:28:11 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 02:28:11 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 02:28:11 [wxauto] [DEBUG] [msg.py:79]  content: 这是通过wxauto发给你的消息！, length: 8
+2025-08-15 03:20:16 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: /微信4.0, length: 10
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: [疑问]有新版本吗, length: 10
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: wxauto开源版暂不支持4.0微信，目前plus版本已经发布beta测试包可支持4.0.5版本
+你可以使用最新的3.9.12.55版本微信，微信官网就可以下载，并且3.9和4.0可以共存，装在不同路径即可, length: 10
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: 好的, length: 10
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: plus多少忙给, length: 10
+2025-08-15 03:20:17 [wxauto] [DEBUG] [msg.py:79]  content: @mr 加我
+引用  的消息 : plus多少忙给, length: 18
+2025-08-15 03:20:17 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: Ace, False, False, 0.5
+2025-08-15 03:20:18 [wxauto] [DEBUG] [sessionbox.py:128]  Ace 完整匹配
+2025-08-15 03:20:18 [wxauto] [DEBUG] [main.py:192]  Ace 切换到聊天窗口: Ace
+2025-08-15 03:20:18 [wxauto] [DEBUG] [sessionbox.py:152]  打开独立窗口: Ace
+2025-08-15 03:20:19 [wxauto] [DEBUG] [sessionbox.py:156]  找到会话: Ace
+2025-08-15 03:20:26 [wxauto] [DEBUG] [wx.py:215]  窗口 Ace 已关闭，移除监听
+2025-08-15 03:21:11 [wxauto] [DEBUG] [wx.py:357]  wxauto("yin") shutdown
+2025-08-15 03:21:15 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: /微信4.0, length: 10
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: [疑问]有新版本吗, length: 10
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: wxauto开源版暂不支持4.0微信，目前plus版本已经发布beta测试包可支持4.0.5版本
+你可以使用最新的3.9.12.55版本微信，微信官网就可以下载，并且3.9和4.0可以共存，装在不同路径即可, length: 10
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: 好的, length: 10
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: plus多少忙给, length: 10
+2025-08-15 03:21:16 [wxauto] [DEBUG] [msg.py:79]  content: @mr 加我
+引用  的消息 : plus多少忙给, length: 18
+2025-08-15 03:21:16 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 03:21:17 [wxauto] [DEBUG] [main.py:192]  最爱的老婆大人🥰 切换到聊天窗口: 最爱的老婆大人🥰
+2025-08-15 03:21:17 [wxauto] [DEBUG] [sessionbox.py:152]  打开独立窗口: 最爱的老婆大人🥰
+2025-08-15 03:21:17 [wxauto] [DEBUG] [sessionbox.py:156]  找到会话: 最爱的老婆大人🥰
+2025-08-15 03:21:34 [wxauto] [DEBUG] [wx.py:215]  窗口 最爱的老婆大人🥰 已关闭，移除监听
+2025-08-15 03:21:37 [wxauto] [DEBUG] [wx.py:357]  wxauto("yin") shutdown
+2025-08-15 03:21:39 [wxauto] [DEBUG] [wx.py:31]  开始监听
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: /微信4.0, length: 10
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: [疑问]有新版本吗, length: 10
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: wxauto开源版暂不支持4.0微信，目前plus版本已经发布beta测试包可支持4.0.5版本
+你可以使用最新的3.9.12.55版本微信，微信官网就可以下载，并且3.9和4.0可以共存，装在不同路径即可, length: 10
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: 好的, length: 10
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: [动画表情], length: 10
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: plus多少忙给, length: 10
+2025-08-15 03:21:40 [wxauto] [DEBUG] [msg.py:79]  content: @mr 加我
+引用  的消息 : plus多少忙给, length: 18
+2025-08-15 03:21:40 [wxauto] [DEBUG] [sessionbox.py:68]  切换聊天窗口: 最爱的老婆大人🥰, False, False, 0.5
+2025-08-15 03:21:41 [wxauto] [DEBUG] [main.py:192]  最爱的老婆大人🥰 切换到聊天窗口: 最爱的老婆大人🥰
+2025-08-15 03:21:41 [wxauto] [DEBUG] [sessionbox.py:152]  打开独立窗口: 最爱的老婆大人🥰
+2025-08-15 03:21:41 [wxauto] [DEBUG] [sessionbox.py:156]  找到会话: 最爱的老婆大人🥰
+2025-08-15 03:22:23 [wxauto] [DEBUG] [msg.py:79]  content: 111, length: 8
+2025-08-15 03:22:23 [wxauto] [DEBUG] [wx.py:223]  [system base]获取到新消息：最爱的老婆大人🥰 - 以下为新消息
+2025-08-15 03:22:24 [wxauto] [DEBUG] [wx.py:223]  [friend text]获取到新消息：最爱的老婆大人🥰 - 111
+2025-08-15 03:22:27 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:27 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:27 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:29 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:32 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:32 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:32 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:33 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:36 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:36 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:36 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:38 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:41 [wxauto] [DEBUG] [msg.py:79]  content: 我喜欢你, length: 8
+2025-08-15 03:22:41 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:41 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:41 [wxauto] [DEBUG] [wx.py:223]  [friend text]获取到新消息：最爱的老婆大人🥰 - 我喜欢你
+2025-08-15 03:22:42 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:44 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:47 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:47 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:47 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:47 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:48 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:50 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:53 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:53 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:53 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:22:53 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:55 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:22:57 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:01 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:01 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:01 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:01 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:04 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:05 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:09 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:09 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:09 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:09 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:10 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:16 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:29 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:29 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:29 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:31 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:34 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:34 [wxauto] [DEBUG] [msg.py:79]  content: 你好, length: 8
+2025-08-15 03:23:34 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:36 [wxauto] [DEBUG] [wx.py:223]  [self text]获取到新消息：最爱的老婆大人🥰 - 你好
+2025-08-15 03:23:39 [wxauto] [DEBUG] [wx.py:357]  wxauto("yin") shutdown
