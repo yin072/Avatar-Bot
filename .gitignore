@@ -4,3 +4,4 @@ myenv/
 __pycache__/
 *.py[cod]  # 同时忽略其他字节码文件（.pyc/.pyo/.pyd）
 /avatar_bot.egg-info/
+/wxauto_logs
