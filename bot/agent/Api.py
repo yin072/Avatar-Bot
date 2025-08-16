@@ -1,6 +1,8 @@
 from fastapi import FastAPI 
 from Agent import Avatar  # 导入 Avatar 类
 from bot.wx_auto.wx_auto_tools import WxAutoTools# 导入 WxAutoTools 类
+from typing import List, Dict 
+
 
 app = FastAPI()  # 创建 FastAPI 实例
 
@@ -10,24 +12,27 @@ def read_root():
 
 @app.post("/chatPage/chat")
 def chat(query:str):
+    """聊天接口"""
     avatar = Avatar()
     msg = avatar.run(query)
     return {"msg":msg}
 
 
-@app.post("/chatpage/getWxListFriendAndMessage")
+@app.get("/chatpage/getWxListFriendAndMessage")
 def getWxListFriendAndMessage():
-    
+    """获取当前微信列表好友与聊天记录接口"""
+    tool= WxAutoTools()
+    msg = tool.get_list_friend_and_message()
     return {"msg":msg}
 
-
-
-
-
-
-
-
-
+@app.post("/chatpage/forwardMessage")
+def stream_message(data: List[Dict[str, str]]):  # 改用 List[Dict]
+    """转发消息至微信接口接口，返回当前聊天窗口的所有消息"""
+    tool = WxAutoTools()
+    for item in data:
+        for key, value in item.items():
+            messages = tool.send_friend_message(key, value)
+    return messages # 返回所有消息
 
 '''
 1. __name__ 的本质
