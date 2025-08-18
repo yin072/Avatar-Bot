@@ -1,17 +1,14 @@
-from fastapi import FastAPI,WebSocket,WebSocketDisconnect,BackgroundTasks
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_openai_tools_agent,AgentExecutor,tool
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain.schema import StrOutputParser
 from langchain.memory import ConversationBufferMemory
-from langchain_community.document_loaders import WebBaseLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 import os
 from qdrant_client import QdrantClient
 from dotenv import load_dotenv
-from Mytools import *
-from Memory import Memory 
+from bot.agent.Mytools import *
+from bot.agent.Memory import Memory 
 
 load_dotenv("bot/config.env")
 
@@ -57,11 +54,19 @@ class Avatar:
             4. 特殊处理
             - 遇到敏感问题（如隐私）必须依据用户的语气回答："我才不说"或者"不告诉你"
             - 对于用户未涉及的领域或不确定时，回答应模糊化："可能吧，我也不知道"
-            - 保持微信特色：适当使用表情符号（如😂），但不要太频繁，也不要太单一，适当把控
+            - 保持微信特色：适当使用表情符号（如😂），但不要太频繁，也不要太单一，适当把控，而且不要用冷门的表情包，一定要用正常人常用，要能正确表达此刻心情的，不能表达情绪的表情包就不要用了。
             
             5. 情绪适配
             - 根据当前情绪调整语气
             你现在回答的语气应该为：{mode}
+
+            你应该着重学习聊天记录中属于'我'的聊天记录，其它信息作为参考，例如以下这段聊天记录：
+            【相关聊天记录 997 | 相似度:0.74】
+            wxid_9tq7ubxv37ox22 (15:29): 我做到了
+            我 (15:30): 666还得是你
+            在这段记录中，"我 (15:30): 666还得是你" 是你需要学习的部分（属于'我'的聊天内容）。
+            而"wxid_9tq7ubxv37ox22 (15:29): 我做到了" 则是参考信息，代表的是对方的消息，现在传入的提问就对应这条内容。
+            相似度 0.74 表示这段聊天记录与当前问题的相关性，相关性越高，表示这段聊天对理解问题越有帮助。
 
             当前你该学习的聊天记录数据：
             {user_profile}
@@ -159,7 +164,7 @@ class Avatar:
         )
     
         
-    def get_chat_data(self, query: str, score_threshold: float = 0.2):
+    def get_chat_data(self, query: str, score_threshold: float = 0.6):
         """获取需要学习的聊天数据"""
         
         """
@@ -180,18 +185,17 @@ class Avatar:
         results = client.search(
             collection_name=os.environ.get("QDRANT_COLLECTION"),
             query_vector=query_vector,
-            limit=10000,  # 足够大的上限
+            limit=1000,  # 足够大的上限
             score_threshold=score_threshold,  # 关键参数
             with_payload=True
         )
         
         # 4. 格式化结果
         self.ChatData = "\n\n".join([
-            f"【相关聊天记录 {i+1} | 相似度:{hit.score:.2f}】\n"
-            f"{hit.payload.get('text', '')}\n"
-            f"元数据: {hit.payload.get('metadata', {})}"
-            for i, hit in enumerate(results)
-        ])
+        f"【相关聊天记录 {i+1} | 相似度:{hit.score:.2f}】\n"
+        f"{hit.payload.get('page_content', '无内容')}"  # 使用实际的聊天内容字段
+        for i, hit in enumerate(results)])
+
     
     def qingxu_chain(self,query:str):
         prompt = """根据用户的输入判断用户的情绪，回应的规则如下：

@@ -33,7 +33,6 @@ class Memory:
         chat_message_history = RedisChatMessageHistory(
             url=os.getenv("REDIS_URL"),session_id=MemoryId
         )
-        print("chat_message_history:",chat_message_history.messages)
         store_message = chat_message_history.messages
         if len(store_message) > 10:
             prompt = ChatPromptTemplate.from_messages(
@@ -47,9 +46,7 @@ class Memory:
             )
             chain = prompt | self.chatmodel 
             summary = chain.invoke({"input":store_message})
-            print("summary:",summary)
             chat_message_history.clear()
             chat_message_history.add_message(summary)
-            print("总结后：",chat_message_history.messages)
         return chat_message_history
     
