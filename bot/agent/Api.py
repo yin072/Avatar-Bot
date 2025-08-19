@@ -27,7 +27,7 @@ def chat(query: str,contact=str):
     try:
         avatar = Avatar(MemoryId=contact)
         msg = avatar.run(query)
-        return Response.success(data=msg['output'])
+        return Response.success(data=msg)
     except Exception as e:
         return Response.error(message=f"聊天处理失败: {str(e)}")
 
@@ -157,7 +157,7 @@ def setting(setting: Dict[str, str]):
 
 
 @app.get("/wechat_rag/count_txt")
-def count_txt_files():
+def handle_and_count():
     """执行完整的微信数据处理流程：先清理Qdrant数据，然后CSV转TXT + 存入Qdrant，返回生成的txt文件个数"""
     try:
         import sys

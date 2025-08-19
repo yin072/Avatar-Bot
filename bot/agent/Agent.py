@@ -54,7 +54,7 @@ class Avatar:
             4. 特殊处理
             - 遇到敏感问题（如隐私）必须依据用户的语气回答："我才不说"或者"不告诉你"
             - 对于用户未涉及的领域或不确定时，回答应模糊化："可能吧，我也不知道"
-            - 保持微信特色：适当使用表情符号（如😂），但不要太频繁，也不要太单一，适当把控，而且不要用冷门的表情包，一定要用正常人常用，要能正确表达此刻心情的，不能表达情绪的表情包就不要用了。
+            - 保持微信特色：适当使用表情符号（如😂），概率为20%，不要太频繁，也不要太单一，适当把控，而且不要用冷门的表情包，一定要用正常人常用，要能正确表达此刻心情的，不能表达情绪的表情包就不要用了。
             
             5. 情绪适配
             - 根据当前情绪调整语气
@@ -166,35 +166,67 @@ class Avatar:
         
     def get_chat_data(self, query: str, score_threshold: float = 0.6):
         """获取需要学习的聊天数据"""
-        
+    
         """
         获取相关性超过阈值的所有记录
-        
+    
         Args:
             query: 查询文本
             score_threshold: 相关性阈值 (0-1)
         """
-        # 1. 生成查询向量
-        embeddings = HuggingFaceEmbeddings(model_name=os.environ.get("EMBEDDING_MODEL"))
-        query_vector = embeddings.embed_query(query)
+        try:
+            # 1. 生成查询向量
+            try:
+                embeddings = HuggingFaceEmbeddings(model_name=os.environ.get("EMBEDDING_MODEL"))
+                query_vector = embeddings.embed_query(query)
+            except Exception as e:
+                print(f"❌ 生成查询向量失败: {e}")
+                self.ChatData = "无法生成查询向量"
+                return
         
-        # 2. 初始化客户端
-        client = QdrantClient(path=os.environ.get("QDRANT_PATH"))
+            # 2. 初始化客户端
+            try:
+                client = QdrantClient(path=os.environ.get("QDRANT_PATH"))
+            except Exception as e:
+                print(f"❌ Qdrant客户端初始化失败: {e}")
+                self.ChatData = "无法连接向量数据库"
+                return
         
-        # 3. 执行带阈值的搜索
-        results = client.search(
-            collection_name=os.environ.get("QDRANT_COLLECTION"),
-            query_vector=query_vector,
-            limit=1000,  # 足够大的上限
-            score_threshold=score_threshold,  # 关键参数
-            with_payload=True
-        )
+            # 3. 执行带阈值的搜索
+            try:
+                results = client.search(
+                    collection_name=os.environ.get("QDRANT_COLLECTION"),
+                    query_vector=query_vector,
+                    limit=1000,  # 足够大的上限
+                    score_threshold=score_threshold,  # 关键参数
+                    with_payload=True
+                )
+            except Exception as e:
+                print(f"❌ 向量搜索失败: {e}")
+                self.ChatData = "搜索失败"
+                return
         
-        # 4. 格式化结果
-        self.ChatData = "\n\n".join([
-        f"【相关聊天记录 {i+1} | 相似度:{hit.score:.2f}】\n"
-        f"{hit.payload.get('page_content', '无内容')}"  # 使用实际的聊天内容字段
-        for i, hit in enumerate(results)])
+            # 4. 格式化结果
+            try:
+                if not results:
+                    print("⚠️ 未找到相关聊天记录")
+                    self.ChatData = "未找到相关聊天记录"
+                    return
+            
+                self.ChatData = "\n\n".join([
+                    f"【相关聊天记录 {i+1} | 相似度:{hit.score:.2f}】\n"
+                    f"{hit.payload.get('page_content', '无内容')}"  # 使用实际的聊天内容字段
+                    for i, hit in enumerate(results)
+                ])
+                print(f"✅ 成功获取 {len(results)} 条相关聊天记录")
+            
+            except Exception as e:
+                print(f"❌ 结果格式化失败: {e}")
+                self.ChatData = "结果处理错误"
+            
+        except Exception as e:
+            print(f"💥 获取聊天数据过程中发生未预期错误: {e}")
+            self.ChatData = "系统错误"
 
     
     def qingxu_chain(self,query:str):
@@ -214,10 +246,20 @@ class Avatar:
         print("情绪判断结果:",result)
         return result
 
+    def sentence_segmentation(self,sentence:str):
+        prompt = """将下面这句话分成你认为合适的几句话，每个句子换行隔开，如果你觉得不用再分就返回原来的句子。不要有其他内容，否则将受到惩罚。
+        句子：{sentence}"""
+        chain = ChatPromptTemplate.from_template(prompt) | self.chatmodel | StrOutputParser()
+        result = chain.invoke({"sentence":sentence})
+        lines_list = result.splitlines()
+        return lines_list
+
     def run(self,query):
         self.qingxu_chain(query)
         self.get_chat_data(query)
         result = self.agent_executor.invoke({"input":query,"chat_history":self.memory.messages})
-        return result
+        print(result)
+        results = self.sentence_segmentation(sentence=result['output'])
+        return results
     
     

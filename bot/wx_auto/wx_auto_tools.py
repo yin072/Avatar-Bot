@@ -94,7 +94,14 @@ class WxAutoTools:
             print("处理消息:", merged_message)
             self.agent.MemoryId = user_id
             reply = self.agent.run(merged_message)  # 同步调用Agent
-            chat.SendMsg(reply.get("output"))
+            for i, message in enumerate(reply):
+                # 不是第一个消息时才等待
+                if i > 0:
+                    word_count = len(message)
+                    pause_time = word_count * 0.2
+                    time.sleep(pause_time)
+                # 发送消息
+                chat.SendMsg(message)
     
         # 使用线程池执行Agent调用
         self.global_queue.executor.submit(_async_agent_call)

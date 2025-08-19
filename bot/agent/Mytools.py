@@ -9,12 +9,16 @@ import os
 load_dotenv("bot/config.env")
 
 @tool
-def search(query:str):
+def search(query: str):
     """只有需要了解实时信息或不知道的事情的时候才会使用这个工具。"""
-    serp = SerpAPIWrapper()
-    result = serp.run(query)
-    print("实时搜索结果:",result)
-    return result
+    try:
+        serp = SerpAPIWrapper()
+        result = serp.run(query)
+        print("实时搜索结果:", result)
+        return result
+    except Exception as e:
+        print(f"搜索异常: {e}")
+        return "搜索服务暂时不可用，请稍后重试"
 
 @tool
 def recognize_image(imageUrl:str):
