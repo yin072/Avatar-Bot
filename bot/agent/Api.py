@@ -3,20 +3,31 @@ from Agent import Avatar  # 导入 Avatar 类
 from bot.wx_auto.wx_auto_tools import WxAutoTools# 导入 WxAutoTools 类
 from typing import List, Dict 
 import asyncio
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.websockets import WebSocketDisconnect 
+
 # 导入通用返回类型
 from bot.agent.response import Response
 
 
 app = FastAPI()  # 创建 FastAPI 实例
 
+# 允许所有来源（生产环境应改为具体域名）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 或 ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有方法（GET/POST/PUT等）
+    allow_headers=["*"],  # 允许所有请求头
+)
 
 @app.post("/chatPage/chat")
-def chat(query: str):
+def chat(query: str,contact=str):
     """聊天接口"""
     try:
-        avatar = Avatar()
+        avatar = Avatar(MemoryId=contact)
         msg = avatar.run(query)
-        return Response.success(data=msg)
+        return Response.success(data=msg['output'])
     except Exception as e:
         return Response.error(message=f"聊天处理失败: {str(e)}")
 
@@ -48,47 +59,58 @@ def stream_message(data: List[Dict[str, str]]):
 async def websocket_endpoint(websocket: WebSocket):
     """单一联系人自动回复接口"""
     await websocket.accept()
+    
     try:
         # 1. 接收参数
         data = await websocket.receive_json()
         friend_name = data["friend_name"]
         wx = WxAutoTools()
         
-        # 2. 启动自动回复并获取返回值
-        return_msg = await wx.begin_auto_reply(friend_name)
+        # 2. 并行执行两个任务
+        auto_reply_task = asyncio.create_task(wx.begin_auto_reply(friend_name))
         await websocket.send_json(Response.success().model_dump())
         
-        # 3. 监听前端停止指令
+        # 3. 消息监听循环
         while True:
             try:
-                # 设置1秒超时，避免永久阻塞
-                msg = await asyncio.wait_for(websocket.receive_json(), timeout=1.0)
+                # 设置超时，避免永久阻塞
+                msg = await asyncio.wait_for(websocket.receive_json(), timeout=0.5)
+                
                 if msg.get("status") == "stopped":
                     stop_result = wx.stop_auto_reply(friend_name)
                     await websocket.send_json(Response.success(status="stopped").model_dump())
+                    auto_reply_task.cancel()  # 取消自动回复任务
                     break
                     
             except asyncio.TimeoutError:
-                # 检查自动回复任务是否意外结束
-                if return_msg == "子窗口被关闭":
-                    await websocket.send_json(Response.error(
-                        message="子窗口被关闭"
-                    ).model_dump())
-                    break
+                # 检查自动回复是否意外结束
+                if auto_reply_task.done():
+                    result = await auto_reply_task
+                    if result == "子窗口被关闭":
+                        await websocket.send_json(Response.error(
+                            message="子窗口被关闭"
+                        ).model_dump())
+                        break
                 continue
                 
-    except KeyError:
-        await websocket.send_json(Response.error(
-            message="需要 friend_name 参数", 
-            code=400
-        ).model_dump())
+    except WebSocketDisconnect:
+        # 连接已断开，无需处理
+        auto_reply_task.cancel() 
+        print("WebSocket连接已断开")
+        return
+        
     except Exception as e:
-        await websocket.send_json(Response.error(
-            message=f"自动回复处理失败: {str(e)}"
-        ).model_dump())
+        try:
+            await websocket.send_json(Response.error(message=str(e)).model_dump())
+        except (WebSocketDisconnect, RuntimeError):
+            # 连接已断开，忽略发送错误
+            pass
     finally:
-        await websocket.close()
-
+        try:
+            await websocket.close()
+        except (WebSocketDisconnect, RuntimeError):
+            # 连接已断开，忽略关闭错误
+            pass
 
 @app.post("/mine/setting")
 def setting(setting: Dict[str, str]):
@@ -131,6 +153,78 @@ def setting(setting: Dict[str, str]):
         return Response.error(
             message=f"设置配置失败: {str(e)}",
             status="setting_failed"
+        )
+
+
+@app.get("/wechat_rag/count_txt")
+def count_txt_files():
+    """执行完整的微信数据处理流程：先清理Qdrant数据，然后CSV转TXT + 存入Qdrant，返回生成的txt文件个数"""
+    try:
+        import sys
+        from pathlib import Path
+        
+        # 添加wechat_rag目录到Python路径
+        wechat_rag_dir = Path(__file__).parent.parent / "wechat_rag"
+        sys.path.append(str(wechat_rag_dir))
+        
+        from Main import process_wechat_data
+        
+        # 执行完整的处理流程（会自动先清理Qdrant数据）
+        txt_count = process_wechat_data()
+        
+        return Response.success(
+            data=f"微信数据处理完成，共处理 {txt_count} 个聊天数据文件",
+            status="processing_completed"
+        )
+        
+    except Exception as e:
+        return Response.error(
+            message=f"微信数据处理失败: {str(e)}",
+            status="processing_failed"
+        )
+
+
+@app.post("/wechat_rag/clear_files")
+def clear_all_files():
+    """清空wxdump_work/export目录下的所有csv和txt文件，同时清理local_qdrant数据"""
+    try:
+        import sys
+        from pathlib import Path
+        
+        # 添加wechat_rag目录到Python路径
+        wechat_rag_dir = Path(__file__).parent.parent / "wechat_rag"
+        sys.path.append(str(wechat_rag_dir))
+        
+        from Main import clear_all_files
+        
+        # 获取wxdump_work/export目录路径
+        export_folder = Path(__file__).parent.parent.parent / "wxdump_work" / "export"
+        
+        if not export_folder.exists():
+            return Response.success(data="导出目录不存在", status="no_export_folder")
+        
+        cleared_count, cleared_files, qdrant_cleared = clear_all_files(str(export_folder))
+        
+        result_message = f"成功清空 {cleared_count} 个文件"
+        if qdrant_cleared:
+            result_message += "，Qdrant数据也已清理"
+        else:
+            result_message += "，但Qdrant数据清理失败"
+        
+        return Response.success(
+            data={
+                "cleared_count": cleared_count,
+                "cleared_files": cleared_files,
+                "qdrant_cleared": qdrant_cleared,
+                "message": result_message
+            },
+            status="files_cleared"
+        )
+        
+    except Exception as e:
+        return Response.error(
+            message=f"清空文件失败: {str(e)}",
+            status="clear_files_failed"
         )
 
 

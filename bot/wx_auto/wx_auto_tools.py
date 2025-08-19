@@ -111,3 +111,4 @@ class WxAutoTools:
         if msg.attr != "time"]
         self.wx.StopListening()
         return new_messages
+    
