@@ -247,7 +247,9 @@ class Avatar:
         return result
 
     def sentence_segmentation(self,sentence:str):
-        prompt = """将下面这句话分成你认为合适的几句话，每个句子换行隔开，如果你觉得不用再分就返回原来的句子。不要有其他内容，否则将受到惩罚。
+        prompt = """将下面这句话分成你认为合适的几句话，每个句子换行隔开，如果你觉得不用再分就返回原来的句子。
+        注意！分句的时候注意标点符号!该留的留，该删的删！比如："我在刷抖音呢，"，这个句子的逗号应该删掉！
+        另外不要添加其他内容，否则将受到惩罚。
         句子：{sentence}"""
         chain = ChatPromptTemplate.from_template(prompt) | self.chatmodel | StrOutputParser()
         result = chain.invoke({"sentence":sentence})

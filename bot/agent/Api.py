@@ -1,10 +1,13 @@
 from fastapi import FastAPI, WebSocket
-from Agent import Avatar  # 导入 Avatar 类
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from bot.agent.Agent import Avatar  # 导入 Avatar 类
 from bot.wx_auto.wx_auto_tools import WxAutoTools# 导入 WxAutoTools 类
 from typing import List, Dict 
 import asyncio
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.websockets import WebSocketDisconnect 
+from starlette.websockets import WebSocketDisconnect
+from pathlib import Path 
 
 # 导入通用返回类型
 from bot.agent.response import Response
@@ -21,12 +24,40 @@ app.add_middleware(
     allow_headers=["*"],  # 允许所有请求头
 )
 
+# 添加静态文件服务
+try:
+    # 挂载静态文件目录
+    static_dir = Path(__file__).parent.parent / "static" / "dist"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
+        print(f"✅ 静态文件目录已挂载: {static_dir}")
+    else:
+        print(f"⚠️ 静态文件目录不存在: {static_dir}")
+except Exception as e:
+    print(f"⚠️ 挂载静态文件失败: {e}")
+
+# 添加根路径处理，返回前端页面
+@app.get("/")
+async def serve_frontend():
+    """服务前端主页"""
+    static_dir = Path(__file__).parent.parent / "static" / "dist"
+    index_file = static_dir / "index.html"
+    
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    else:
+        return {"message": "前端页面未找到，请确保已构建Vue项目并复制到static/dist目录"}
+
+# 注意：这里先定义所有API路由，然后再定义通配符路由
+# 通配符路由会移到最后，避免拦截API请求
+
 @app.post("/chatPage/chat")
 def chat(query: str,contact=str):
     """聊天接口"""
     try:
         avatar = Avatar(MemoryId=contact)
         msg = avatar.run(query)
+        print(msg)
         return Response.success(data=msg)
     except Exception as e:
         return Response.error(message=f"聊天处理失败: {str(e)}")
@@ -235,6 +266,279 @@ def clear_all_files():
 直接运行时：__name__ 被设为 "__main__"。
 被导入时：__name__ 被设为模块的文件名（不含 .py 后缀）
 '''
-if __name__ == "__main__":
+
+def open_frontend():
+    """打开前端界面（不启动服务器）"""
+    import webbrowser
+    import socket
+    
+    print("🌐 打开Avatar Bot前端界面...")
+    
+    # 检查服务器是否在运行
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('localhost', 8000))
+        sock.close()
+        
+        if result == 0:
+            print("✅ 服务器正在运行")
+            try:
+                webbrowser.open('http://localhost:8000')
+                print("✅ 已打开浏览器")
+                print("🌐 前端地址: http://localhost:8000")
+                print("🔌 API文档: http://localhost:8000/docs")
+            except Exception as e:
+                print(f"❌ 无法打开浏览器: {e}")
+                print("请手动访问: http://localhost:8000")
+        else:
+            print("⚠️ 服务器未运行")
+            print("请先运行 'avatar serve' 启动服务器")
+    except Exception as e:
+        print(f"⚠️ 无法检查服务器状态: {e}")
+
+def start_server():
+    """启动完整服务器（API + 前端）"""
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000,ws="websockets")
+    import webbrowser
+    import threading
+    import time
+    import subprocess
+    import sys
+    import os
+    import signal
+    
+    print("🚀 Avatar Bot 服务器启动中...")
+    print("=" * 40)
+    print("🌐 前端页面: http://localhost:8000")
+    print("🔌 API接口: http://localhost:8000/docs")
+    print("📁 静态文件: http://localhost:8000/static/")
+    print("📱 wxdump UI 界面将自动启动")
+    print("💡 如果关闭浏览器，可以运行 'avatar ui' 重新打开")
+    print("💡 服务器将在后台运行，终端可以继续使用")
+    print("=" * 40)
+    
+    # 使用subprocess在后台启动服务器
+    try:
+        # 构建启动命令
+        cmd = [sys.executable, "-c", f"""
+import uvicorn
+from bot.agent.Api import app
+uvicorn.run(app, host="0.0.0.0", port=8000, ws="websockets")
+"""]
+        
+        # 在后台启动服务器进程
+        server_process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=os.getcwd()
+        )
+        
+        print(f"✅ 服务器进程已启动 (PID: {server_process.pid})")
+        
+        # 等待服务器启动
+        time.sleep(3)
+        
+        # 检查服务器是否成功启动
+        import socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('localhost', 8000))
+        sock.close()
+        
+        if result == 0:
+            print("✅ 服务器已成功启动！")
+            
+            # 直接在主进程中打开浏览器，确保能执行
+            try:
+                print("🌐 正在打开浏览器...")
+                webbrowser.open('http://localhost:8000')
+                print("✅ 已自动打开浏览器")
+            except Exception as e:
+                print(f"⚠️ 无法自动打开浏览器: {e}")
+                print("请手动访问: http://localhost:8000")
+            
+            # 自动运行 wxdump ui 命令
+            try:
+                print("📱 正在启动 wxdump UI 界面...")
+                wxdump_process = subprocess.Popen(
+                    ['wxdump', 'ui'],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=os.getcwd()
+                )
+                print(f"✅ wxdump UI 已启动 (PID: {wxdump_process.pid})")
+                
+                # 保存wxdump进程ID到文件
+                with open("wxdump.pid", "w") as f:
+                    f.write(str(wxdump_process.pid))
+                    
+            except Exception as e:
+                print(f"⚠️ 无法启动 wxdump UI: {e}")
+                print("请手动运行 'wxdump ui' 命令")
+            
+            print("🌐 前端地址: http://localhost:8000")
+            print("🔌 API地址: http://localhost:8000/docs")
+            print("📱 wxdump UI 界面已启动")
+            print("💡 现在可以继续使用终端，运行其他命令")
+            print("💡 要停止服务器，请运行 'avatar stop' 或重启终端")
+            print("=" * 40)
+            
+            # 保存服务器进程ID到文件，方便后续停止
+            with open("server.pid", "w") as f:
+                f.write(str(server_process.pid))
+            
+        else:
+            print("❌ 服务器启动失败")
+            server_process.terminate()
+            return
+            
+    except Exception as e:
+        print(f"❌ 启动服务器失败: {e}")
+        return
+
+def stop_server():
+    """停止服务器"""
+    import socket
+    import os
+    import signal
+    
+    print("🛑 正在停止Avatar Bot服务器...")
+    
+    try:
+        # 尝试连接服务器
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('localhost', 8000))
+        sock.close()
+        
+        if result == 0:
+            # 服务器正在运行，尝试停止
+            if os.path.exists("server.pid"):
+                try:
+                    with open("server.pid", "r") as f:
+                        pid = int(f.read().strip())
+                    
+                    # 尝试终止进程
+                    os.kill(pid, signal.SIGTERM)
+                    print(f"✅ 已发送停止信号到服务器进程 (PID: {pid})")
+                    
+                    # 等待进程结束
+                    import time
+                    time.sleep(2)
+                    
+                    # 检查是否真的停止了
+                    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    result = sock.connect_ex(('localhost', 8000))
+                    sock.close()
+                    
+                    if result != 0:
+                        print("✅ 服务器已成功停止")
+                        os.remove("server.pid")
+                    else:
+                        print("⚠️ 服务器仍在运行，可能需要手动停止")
+                        
+                except Exception as e:
+                    print(f"⚠️ 无法停止服务器进程: {e}")
+                    print("💡 请手动关闭终端或重启系统")
+            else:
+                print("⚠️ 找不到服务器进程ID文件")
+                print("💡 请手动关闭终端或重启系统")
+        
+        # 尝试停止 wxdump UI 进程
+        if os.path.exists("wxdump.pid"):
+            try:
+                with open("wxdump.pid", "r") as f:
+                    wxdump_pid = int(f.read().strip())
+                
+                # 尝试终止 wxdump 进程
+                os.kill(wxdump_pid, signal.SIGTERM)
+                print(f"✅ 已发送停止信号到 wxdump UI 进程 (PID: {wxdump_pid})")
+                
+                # 等待进程结束
+                import time
+                time.sleep(1)
+                
+                # 检查是否真的停止了
+                try:
+                    os.kill(wxdump_pid, 0)  # 检查进程是否存在
+                    print("⚠️ wxdump UI 进程仍在运行，可能需要手动停止")
+                except OSError:
+                    print("✅ wxdump UI 进程已成功停止")
+                    os.remove("wxdump.pid")
+                    
+            except Exception as e:
+                print(f"⚠️ 无法停止 wxdump UI 进程: {e}")
+                print("💡 请手动关闭 wxdump UI 窗口")
+        else:
+            print("✅ wxdump UI 进程未运行")
+            
+    except Exception as e:
+        print(f"⚠️ 无法检查服务器状态: {e}")
+        print("💡 请手动关闭终端或重启系统")
+
+def cli_main():
+    """CLI主入口函数"""
+    import sys
+    
+    if len(sys.argv) < 2:
+        print("🎯 Avatar Bot 命令行工具")
+        print("=" * 30)
+        print("使用方法:")
+        print("  avatar serve    # 启动服务器")
+        print("  avatar ui       # 打开前端界面")
+        print("  avatar stop     # 停止服务器")
+        print("  avatar help     # 显示帮助信息")
+        return
+    
+    command = sys.argv[1].lower()
+    
+    if command == "serve":
+        start_server()
+    elif command == "ui":
+        open_frontend()
+    elif command == "stop":
+        stop_server()
+    elif command in ["help", "-h", "--help"]:
+        print("🎯 Avatar Bot 命令行工具")
+        print("=" * 30)
+        print("命令:")
+        print("  serve   启动完整服务器（API + 前端）")
+        print("  ui      打开前端界面（需要服务器已运行）")
+        print("  stop    停止服务器")
+        print("  help    显示此帮助信息")
+        print("\n示例:")
+        print("  avatar serve    # 启动服务器")
+        print("  avatar ui       # 重新打开前端")
+        print("  avatar stop     # 停止服务器")
+    else:
+        print(f"❌ 未知命令: {command}")
+        print("使用 'avatar help' 查看可用命令")
+
+# 最后定义通配符路由，支持前端路由
+# 这个路由必须在所有API路由之后定义，避免拦截API请求
+@app.get("/{full_path:path}")
+async def serve_frontend_routes(full_path: str):
+    """处理前端路由，返回index.html"""
+    # 跳过API路由，避免冲突
+    if full_path.startswith(("chatpage/", "wechat_rag/", "mine/", "knowledge/", "ws/")):
+        return {"message": "API路由不存在"}
+    
+    static_dir = Path(__file__).parent.parent / "static" / "dist"
+    
+    # 检查请求的文件是否存在
+    file_path = static_dir / full_path
+    if file_path.exists() and file_path.is_file():
+        return FileResponse(str(file_path))
+    
+    # 文件不存在，返回index.html（支持前端路由）
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    else:
+        return {"message": "前端页面未找到"}
+if __name__ == "__main__":
+    # 直接运行main函数，保持向后兼容
+    main()
+
+def main():
+    """保持原有的main函数，用于直接运行Api.py"""
+    start_server()
